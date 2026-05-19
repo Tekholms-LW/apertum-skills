@@ -141,13 +141,52 @@ Community and ecosystem tokens verified on the explorer:
 
 ---
 
-## Bridge Contracts
+## Apertum Bridge — Wallet Addresses
 
-| Contract | Address | Status |
-|----------|---------|--------|
-| Apertum Bridge (C-Chain ↔ Apertum) | *Check bridge.apertum.io* | ⚠️ Verify on explorer |
+The Apertum bridge at `https://bridge.apertum.io/` uses cross-chain hot/cold wallets to hold and manage bridged assets. These are verified via the [Proof of Assets](https://bridge.apertum.io/en/proof-of-assets) page. All addresses below are EOAs (wallets), not contracts — confirmed on the Apertum explorer.
 
-> The bridge UI is at `https://bridge.apertum.io/`. Bridge contracts should be verified before use. Check the explorer for verified bridge contract addresses and confirm the trust model before bridging significant value.
+### Apertum Chain Bridge Wallets
+
+| Role | Address | Status |
+|------|---------|--------|
+| Bridge Wallet 1 | `0x2dE2D985Ac56e444F79D851aeE1d79b60C49c522` | ✅ EOA, active (928 txns) |
+| Bridge Wallet 2 | `0x3EF999E19B44E4c8e9E339B813008C86E514f68c` | ✅ EOA, active (16K+ txns) |
+| Bridge Wallet 3 | `0xc6913f979bd2ab0a0eDA33f2271AFc80B765e7d5` | ✅ EOA, active |
+| Shared Cold Wallet | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` | ✅ EOA, cross-chain cold |
+
+### Ethereum Side (ERC-20 Bridge Paths)
+
+| Asset | Hot Wallet | Cold Wallet |
+|-------|-----------|-------------|
+| USDT (via Apertum Bridge) | `0x25dAa3520c664F2018e8040798A0D6bD34C77969` | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` |
+| USDT (via separate route) | `0x6f2E09A58A9961eD3609578591ED4210fa444f76` | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` |
+| USDT (via separate route) | `0xb0902C722809234B369dA0d7896E07614412f261` | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` |
+
+### BSC Side
+
+| Asset | Hot Wallet | Cold Wallet |
+|-------|-----------|-------------|
+| BNB | `0x23aAf7A6933f11252217363FbDebd04c430b8C19` | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` |
+| USDT | `0x7EbaB49a8B7e3eF5d98d9CBA694C3b15C6E57182` | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` |
+
+### Avalanche C-Chain Side
+
+| Asset | Hot Wallet | Cold Wallet |
+|-------|-----------|-------------|
+| Core | `0x23aAf7A6933f11252217363FbDebd04c430b8C19` | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` |
+| Alt | `0x3EF999E19B44E4c8e9E339B813008C86E514f68c` | `0x9A5e0DAEFed1F88faC890a3bf12d61CCd165114E` |
+
+### Bridge Paths Supported
+
+| Source Chain → Apertum | Assets |
+|------------------------|--------|
+| BSC | BNB, USDT |
+| Ethereum | USDT |
+| Avalanche C-Chain | Core, USDT |
+| Solana | SOL (verified) |
+| G999 | G999 (verified) |
+
+> **Note:** Bridge addresses are EOAs (wallets), not smart contracts. The actual bridge logic runs offchain through the bridge infrastructure. Verify against `https://bridge.apertum.io/en/proof-of-assets` before transacting.
 
 ---
 
@@ -175,7 +214,7 @@ Verify deployment on Apertum explorer before use.
 | Bridge | `https://bridge.apertum.io/` |
 | Contract Wizard | `https://wizard.apertum.io/` |
 | Faucet (Testnet) | `https://faucet.apertum.io/` |
-| DEX Subgraph | `https://graph.apertum.io/subgraphs/name/dex/dex-subgraph` |
+| DEX Subgraph | *Check explorer for subgraph URL* |
 | Testnet Explorer | `https://explorer-testnet.apertum.io/` |
 
 ---
