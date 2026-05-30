@@ -1,6 +1,6 @@
 ---
 name: indexing
-description: How to read and query onchain data on Apertum. Events, Blockscout API, The Graph subgraph (graph.apertum.io), and indexing patterns. Why you cannot just loop through blocks, and what to use instead.
+description: How to read and query onchain data on Apertum. Events, Blockscout API (v1/v2), The Graph subgraph (graph.apertum.io), RPC access, and indexing patterns. Includes verified endpoints and test cases using the DEX Router contract.
 ---
 
 # Onchain Data & Indexing on Apertum
@@ -31,8 +31,6 @@ contract Marketplace {
 }
 ```
 
----
-
 ## Reading Events
 
 ### Via RPC (Small Scale)
@@ -51,13 +49,9 @@ const logs = await client.getLogs({
 });
 ```
 
-### Via Blockscout API
+### Via Blockscout API (Recommended for most AI/agent use)
 
-```bash
-curl "https://explorer.apertum.io/api?module=logs&action=getLogs&address=0x...&fromBlock=0&toBlock=latest"
-```
-
----
+See the full verified catalog below.
 
 ## The Graph Subgraph
 
@@ -125,23 +119,72 @@ Use The Graph for historical + polling for the latest few blocks (before the sub
 
 ---
 
-## Blockscout API (Etherscan-Compatible)
+## Blockscout API — Verified Endpoints (2026-05-30)
 
-The Blockscout API on Apertum is largely compatible with the Etherscan API:
+Apertum uses Blockscout. There are two API surfaces:
 
-```bash
-# Account balance
-curl "https://explorer.apertum.io/api?module=account&action=balance&address=0x...&tag=latest"
+**Base**: `https://explorer.apertum.io`
 
-# Transaction list
-curl "https://explorer.apertum.io/api?module=account&action=txlist&address=0x...&startblock=0&endblock=latest"
+- **v1** (Etherscan-compatible query params): `https://explorer.apertum.io/api`
+- **v2** (modern REST): `https://explorer.apertum.io/api/v2`
 
-# Token transfers
-curl "https://explorer.apertum.io/api?module=account&action=tokentx&address=0x..."
+### Working v1 Endpoints (reliable)
+- `?module=contract&action=getsourcecode&address=...`
+- `?module=contract&action=getabi&address=...`
+- Account: balance, txlist, tokentx, tokenbalance, etc.
 
-# Contract ABI (if verified)
-curl "https://explorer.apertum.io/api?module=contract&action=getabi&address=0x..."
+### Working v2 Endpoints (preferred for new work)
+- `/api/v2/stats` — coin price, gas, utilization
+- `/api/v2/addresses/{addr}/logs`
+- `/api/v2/addresses/{addr}/transactions?filter=to`
+- `/api/v2/tokens/{contract}/instances/{id}/transfers`
+- `/api/v2/addresses/{addr}/tokens?type=ERC-721`
+- `/api/v2/tokens?type=ERC-721` (or ERC-20)
+
+**Pagination**: v2 responses include `next_page_params`. URL-encode the JSON object when following.
+
+**Timestamps**: ISO 8601 strings (e.g. `2026-05-30T20:18:39.000000Z`). Use `datetime.fromisoformat()`.
+
+**Log topics**: 32-byte zero-padded. Strip `0x000000000000000000000000` prefix for addresses.
+
+**Null addresses**: Filter `0x000...000` before certain calls (can cause 422).
+
+**Tested working** with proper User-Agent header in Python urllib/requests.
+
+### Non-working (as of 2026-05-30)
+- Most v2 smart-contract POST read/query endpoints return 404/403.
+- v1 `contract.call` often returns "Something went wrong".
+
+Full practical patterns (including OpenPlaza NFT forensics use cases) are also maintained in the Hermes Agent skills (`apertum-nft-forensics` and `nft-marketplace-dev`).
+
+---
+
+## RPC Access (Verified 2026-05-30)
+
+**Correct full RPC URL** (from https://chainlist.org/chain/2786):
+
 ```
+https://rpc.apertum.io/ext/bc/YDJ1r9RMkewATmA7B35q1bdV18aywzmdiXwd9zGBq3uQjsCnn/rpc
+```
+
+**Tested with Verified DEX Router contract**:
+- Address: `0x73cf8b5c2F4920967Bd8e9dECDb18F9F1e12A29f`
+- ABI: Available on explorer (`?tab=contract_abi`)
+- Example: `eth_call` to `factory()` selector `0xc45a0155` returns `0x8bb8aa56642042a8c4de698e801f2e54ed5417dc` (correct).
+
+**For AI agents**:
+- Explorer v1/v2 REST API → Works reliably inside sandboxes and agent loops.
+- Direct RPC (`eth_call`, etc.) → Works from terminal tool, host Python (requests + json or web3.py), and external scripts. Some sandboxes (e.g. execute_code) return 403 — use Explorer API as primary path in those environments.
+
+Example curl test:
+```bash
+RPC="https://rpc.apertum.io/ext/bc/YDJ1r9RMkewATmA7B35q1bdV18aywzmdiXwd9zGBq3uQjsCnn/rpc"
+curl -s -X POST -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","method":"eth_call","params":[{"to":"0x73cf8b5c2F4920967Bd8e9dECDb18F9F1e12A29f","data":"0xc45a0155"},"latest"],"id":1}' \
+  $RPC
+```
+
+The Python client at https://github.com/Tekholms-LW (or local /home/sky_ai/apertum/apertum.py) already uses this RPC.
 
 ---
 
@@ -149,30 +192,15 @@ curl "https://explorer.apertum.io/api?module=contract&action=getabi&address=0x..
 
 ### Get All Holders of a Token
 
-Query `Transfer` events and aggregate balances:
-
-```python
-# Process Transfer events to build holder map
-holders = {}
-for event in transfer_events:
-    sender = event["from"]
-    receiver = event["to"]
-    amount = event["value"]
-    
-    holders[sender] = holders.get(sender, 0) - amount
-    holders[receiver] = holders.get(receiver, 0) + amount
-
-# Filter zero balances
-active_holders = {addr: bal for addr, bal in holders.items() if bal > 0}
-```
+Query `Transfer` events and aggregate balances (or use v2 `/tokens/.../holders` where available).
 
 ### Track Daily Volume
 
-Sum transfer amounts grouped by date from Transfer events.
+Sum transfer amounts grouped by date from Transfer events (cross-reference timestamps via transactions endpoint).
 
 ### Monitor Specific Activity
 
-Filter events by address and topic, process incrementally.
+Filter events by address and topic, process incrementally using the logs endpoint.
 
 ---
 
@@ -183,3 +211,8 @@ Filter events by address and topic, process incrementally.
 3. **Index by the fields you filter on.** You get 3 indexed topics per event. Use them for addresses and IDs.
 4. **Subgraph may lag behind** the latest blocks. Use polling for the trailing edge.
 5. **APTM transfers don't emit ERC-20 events.** Native transfers are tracked in transaction traces, not logs.
+6. **Sandbox RPC restrictions**: Some agent environments block or rate-limit direct RPC — prefer Explorer API for agent-internal logic.
+
+---
+
+*Last major verification: 2026-05-30 (RPC + full explorer v1/v2 catalog using DEX Router 0x73cf8b5c2F4920967Bd8e9dECDb18F9F1e12A29f as test case).*

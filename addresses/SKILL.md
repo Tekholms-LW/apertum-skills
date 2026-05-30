@@ -54,6 +54,7 @@ The Apertum native DEX is a Uniswap V2-style AMM. All core contracts are verifie
 | Contract | Address | Status |
 |----------|---------|--------|
 | **DexRouter** | `0x73cf8b5c2F4920967Bd8e9dECDb18F9F1e12A29f` | ✅ Verified |
+> **RPC + Explorer verification (2026-05-30)**: This contract was used as the primary test vector for confirming the correct RPC URL (from chainlist.org/chain/2786) and all major Blockscout API endpoints. See `indexing/SKILL.md` for the full test (successful eth_call to factory()) and detailed API catalog.
 | **DexFactory** | `0x8bb8aA56642042A8c4dE698E801f2e54Ed5417dc` | ✅ Verified |
 
 ### Key LP Pairs (IDEX-V2 LP Tokens)

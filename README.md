@@ -11,15 +11,15 @@ A collection of 23 SKILL.md files that give AI coding agents (Claude, Hermes, Co
 Point your agent to the master skill:
 
 ```
-https://raw.githubusercontent.com/apertum-skills/apertum-skills/main/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/SKILL.md
 ```
 
 Or fetch individual skills:
 
 ```
-https://raw.githubusercontent.com/apertum-skills/apertum-skills/main/getting-started/SKILL.md
-https://raw.githubusercontent.com/apertum-skills/apertum-skills/main/addresses/SKILL.md
-https://raw.githubusercontent.com/apertum-skills/apertum-skills/main/ship/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/getting-started/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/addresses/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/ship/SKILL.md
 ```
 
 ---
@@ -33,8 +33,26 @@ https://raw.githubusercontent.com/apertum-skills/apertum-skills/main/ship/SKILL.
 | Native Token | APTM (18 decimals) |
 | Block Time | ~2.8s |
 | Gas | ~34 gwei (< $0.01/tx) |
-| RPC | `https://rpc.apertum.io/ext/bc/...` |
+| RPC | `https://rpc.apertum.io/ext/bc/YDJ1r9RMkewATmA7B35q1bdV18aywzmdiXwd9zGBq3uQjsCnn/rpc` (full URL verified 2026-05-30) |
 | Explorer | `https://explorer.apertum.io/` |
+
+---
+
+## Recent Verification (2026-05-30)
+
+**RPC and Explorer API audit completed:**
+
+- Correct RPC URL confirmed against https://chainlist.org/chain/2786.
+- All major Blockscout v1 (Etherscan-compatible) and v2 REST endpoints verified live and functional (stats, logs, token transfers, addresses, contracts, getabi, etc.).
+- **Test vector**: Verified DEX Router contract `0x73cf8b5c2F4920967Bd8e9dECDb18F9F1e12A29f` (and its ABI at the explorer `?tab=contract_abi`).
+  - Successful `eth_call` to `factory()` via JSON-RPC returns the expected factory address.
+  - Full details, curl examples, and AI usage guidance (Explorer API preferred in agent sandboxes; RPC via terminal tool or host scripts) documented in `indexing/SKILL.md`.
+
+**AI Access Note**: 
+- Explorer REST API (v1/v2): Fully reliable from inside AI agent environments and scripts.
+- RPC: Functional for `eth_call`, state reads, etc., from terminal, dedicated Python (e.g., web3.py), or external tools. Direct calls from some sandboxes may return 403 (provider protection) — fall back to Explorer API in those cases.
+
+See `indexing/SKILL.md` for the complete catalog and patterns.
 
 ---
 
@@ -64,7 +82,7 @@ https://raw.githubusercontent.com/apertum-skills/apertum-skills/main/ship/SKILL.
 - **[qa](qa/SKILL.md)** — Pre-ship audit checklist
 
 ### Data & Indexing
-- **[indexing](indexing/SKILL.md)** — Events, Blockscout API, The Graph subgraph
+- **[indexing](indexing/SKILL.md)** — Events, Blockscout API (detailed v1/v2 catalog + RPC test), The Graph subgraph
 
 ### Infrastructure
 - **[protocol](protocol/SKILL.md)** — Avalanche L1 governance, upgrades
@@ -87,7 +105,7 @@ When an AI agent is asked to build on Apertum:
 
 ```
 Before writing Solidity, deploying contracts, or building a dApp 
-frontend on Apertum, read https://raw.githubusercontent.com/apertum-skills/apertum-skills/main/SKILL.md 
+frontend on Apertum, read https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/SKILL.md 
 and follow it.
 ```
 
@@ -108,6 +126,8 @@ Contract addresses are the most critical and fastest-moving part of this pack. T
 1. Verify a contract address on the [Apertum Explorer](https://explorer.apertum.io/)
 2. Add it to `addresses/SKILL.md` with the ✅ Verified status
 3. Open a PR
+
+For API/RPC patterns: Update `indexing/SKILL.md` with new verified endpoints or test cases (e.g., using the DEX Router as reference).
 
 ---
 
@@ -132,7 +152,7 @@ apertum-skills/
 ├── frontend-playbook/     # Deploy pipeline
 ├── orchestration/         # Build system
 ├── qa/                    # QA checklist
-├── indexing/              # Onchain data
+├── indexing/              # Onchain data + Blockscout/RPC
 ├── noir/                  # Privacy apps
 ├── audit/                 # Audit methodology
 ├── protocol/              # Governance
