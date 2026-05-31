@@ -193,8 +193,153 @@ Before deploying ANY contract on Apertum:
 3. **Apertum is EVM-compatible** — all Ethereum security patterns apply. Same vulnerabilities, same defenses.
 4. **Cross-chain bridges** add attack surface. If your contract receives bridged assets, consider the bridge's security model. Fetch `bridge/SKILL.md` and `cross-chain/SKILL.md`.
 
----
+## Upgradable Contracts (UUPS Recommended on Apertum)
+
+NFT marketplaces on Apertum commonly use UUPS proxies (preferred over Transparent for gas efficiency on low-cost chains like Apertum). Specific deployment details are project-local.
+
+### Core Patterns (OpenZeppelin 5+ style)
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.25;
+
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
+
+contract MyUpgradable is UUPSUpgradeable, Ownable2StepUpgradeable {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address initialOwner) public initializer {
+        __Ownable2Step_init();
+        __UUPSUpgradeable_init();
+        _transferOwnership(initialOwner);
+    }
+
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
+
+    // ... your logic
+    uint256[50] private __gap;
+}
+```
+
+**Deployment pattern**:
+```bash
+forge create --rpc-url $APERTUM_RPC src/MyUpgradable.sol:MyUpgradable --private-key $PK
+# Use ERC1967Proxy or upgradeable deploy script for proxy + impl
+```
+
+**Security Checklist Additions** (add to your pre-deploy list):
+- [ ] Storage gaps (__gap) on all upgradeable contracts
+- [ ] initialize() protected with initializer modifier (only once)
+- [ ] _authorizeUpgrade restricted (Ownable2Step + timelock/multisig for production)
+- [ ] No constructor logic in the implementation contract
+- [ ] Full upgrade path tested on fork (vm.upgradeToAndCall)
+- [ ] Never selfdestruct or use delegatecall in implementation
+- [ ] Verify BOTH proxy and implementation on Blockscout
+- [ ] For tokens/marketplaces use ERC721Upgradeable / ERC20Upgradeable bases
+
+**Common Pitfalls**:
+- Storage collision on upgrade (always use gaps or structured storage)
+- Upgrade auth too permissive (single EOA is a major risk)
+- Testing only the implementation, not the proxied version
+
+See references/secure-upgradable-template.md for full UUPS ERC721 + royalties + marketplace example.
+
+## Industry-Specific Security Patterns
+
+### NFT Marketplace (Core Use Case)
+- Use EIP-712 signed orders/listings to prevent front-running on ~2.8s blocks.
+- Strict CEI + ReentrancyGuard on every value-moving path (list, buy, cancel, royalty distribution).
+- Always use SafeERC20 + low-level .call for native APTM payments.
+- Royalty enforcement (EIP-2981) on fulfillment — never bypass on secondary sales.
+- Batch operations: validate *all* inputs before any state mutation.
+- DID/identity hooks where applicable (combine with Hermes three-tier runtime verification).
+- Approval management hygiene (avoid unlimited setApprovalForAll where possible).
+
+### Gaming / Multi-Asset (ERC-1155)
+- Role-based minting (separate game-server role vs player-controlled).
+- Hard supply caps + invariants ("totalMinted <= maxSupply" must always hold).
+- Batch transfers protected by reentrancy guards.
+- Soulbound items via ERC-5192 for non-transferable assets.
+
+### RWA / Compliance Tokens
+- Emergency pausable for regulatory action.
+- Transfer hooks for on-chain KYC/attestation checks.
+- Oracle staleness + circuit breakers.
+- Permissioned transfer logic (whitelists or compliance modules).
+
+### Agent / Payment Economies (see apertum-ai-infra contracts)
+Apply every pattern above. Current examples (e.g. AgentPayment.sol) use direct payable().transfer() in refund/_distributePayment paths and raw require strings — refactor to CEI + ReentrancyGuard + custom errors + .call with success checks.
+
+**Runtime complement**: Combine contract-level prevention with Hermes `openplaza-security-scan` (daily transfer-chain red flags, RAPID_LIST/HOT_MINT/MULTI_HOP, DID cross-check) and `apertum-nft-forensics`.
+
+## Consistent Function Ordering + Coding Standards
+
+All contracts in this pack (and recommended for Apertum projects) follow this layout for predictability and auditability:
+
+1. SPDX license + pragma solidity ^0.8.25;
+2. Imports (OpenZeppelin first, then local interfaces, then others)
+3. Custom Errors (preferred over require strings — better gas + UX)
+4. Events
+5. State variables (immutables/constants first, then storage; include __gap[50] for upgradeables)
+6. Modifiers
+7. Constructor (or initialize() for upgradeables)
+8. receive() / fallback()
+9. External functions (group: Admin functions, Core logic/writes, then Views)
+10. Public functions
+11. Internal / private helpers (lowest visibility last)
+
+**Example skeleton** (use as template):
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.25;
+
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+
+contract Example is ReentrancyGuard {
+    // Errors
+    error Unauthorized();
+    error InvalidAmount(uint256 provided);
+
+    // Events
+    event Action(address indexed user, uint256 amount);
+
+    // State
+    mapping(address => uint256) private _balances;
+    uint256[50] private __gap; // upgradeable safety
+
+    // Modifiers
+    modifier onlyAdmin() { if (msg.sender != admin) revert Unauthorized(); _; }
+
+    // Constructor / Initializer
+    constructor() { ... }
+
+    // External
+    function adminAction() external onlyAdmin { ... }
+    function coreWrite(uint256 amt) external nonReentrant { ... } // CEI inside
+    function viewBalance(address user) external view returns (uint256) { ... }
+
+    // Internal
+    function _internalHelper() internal { ... }
+}
+```
+
+**Enforcement tools** (add to your pre-deploy checklist):
+- `forge fmt`
+- solhint (with ordering rules) + .solhint.json
+- prettier-plugin-solidity
+- Pre-commit hook or CI step
 
 ## When to Get a Real Audit
+
+For contracts holding >$10K in value, get a professional audit. Fetch `audit/SKILL.md` for the systematic audit methodology using parallel specialist agents.
+
+**Post-2026-05-30 enhancements**: This file now includes dedicated upgradable, industry (NFT marketplace, gaming, RWA), and coding-standards sections. Use together with the new references/secure-upgradable-template.md and references/nft-marketplace-security-patterns.md.
 
 For contracts holding >$10K in value, get a professional audit. Fetch `audit/SKILL.md` for the systematic audit methodology using parallel specialist agents.

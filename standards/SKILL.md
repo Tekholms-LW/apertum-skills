@@ -66,7 +66,6 @@ contract MyNFT is ERC721URIStorage {
         uint256 tokenId = _nextTokenId++;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
-        return tokenId;
     }
 }
 ```
@@ -145,6 +144,61 @@ contract MyToken is ERC20, ERC20Permit {
 
 ---
 
+## EIP-2981 — NFT Royalties (Critical for Marketplaces like OpenPlaza)
+```solidity
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+
+contract MyNFT is ERC721, IERC2981 {
+    function royaltyInfo(uint256 tokenId, uint256 salePrice)
+        external
+        view
+        override
+        returns (address receiver, uint256 royaltyAmount)
+    {
+        royaltyAmount = (salePrice * 500) / 10_000; // 5%
+        receiver = royaltyRecipient; // or ownerOf(tokenId)
+    }
+}
+```
+Enforce this in any marketplace buy/fulfill logic. Pitfall: royalties can be bypassed on direct transfers — document clearly and consider hooks.
+
+## Secure ERC-721 & ERC-1155 Extensions
+- Recommended secure base: ERC721 + URIStorage + Burnable + Pausable + AccessControl (roles for mint).
+- Enumerable: Only for small collections (high gas cost on large sets).
+- High-volume minting: Consider ERC721A for batch efficiency — audit the batch mint logic carefully.
+- Non-transferable / soulbound (especially for DID/identity tokens): Implement ERC-5192.
+- ERC-1155: Add supply tracking, batch burn, pausable, and role-restricted minting.
+
+## Upgradable Token & Protocol Bases
+Use the upgradeable equivalents from @openzeppelin/contracts-upgradeable together with the UUPS pattern documented in security/SKILL.md (storage gaps, initializer, _authorizeUpgrade).
+
+## Other Relevant Standards
+- ERC-1363: Payable tokens with transfer hooks.
+- ERC-777: Token hooks (high reentrancy risk — use only with extreme caution and full guards).
+- Permissioned/RWA tokens: Patterns similar to ERC-3643 (transfer restrictions + compliance attestations).
+
+## Recommended Contract Layout & Ordering (2026 Standard)
+
+Follow this exact ordering in every contract for consistency, readability, and easier audits:
+
+1. SPDX + pragma
+2. Imports (OZ first, local interfaces, then others)
+3. Custom Errors (preferred — gas + better UX than require strings)
+4. Events
+5. State variables (constants/immutables first, then mappings/storage; always include uint256[50] __gap for upgradeables)
+6. Modifiers
+7. Constructor or initialize()
+8. receive() / fallback()
+9. External functions (Admin group → Core writes → Views)
+10. Public functions
+11. Internal / private helpers last
+
+Example (see security/SKILL.md for the full skeleton with errors/events/state/modifiers).
+
+**Enforcement**: `forge fmt`, solhint (ordering plugin), prettier-plugin-solidity, CI gate.
+
+---
+
 ## Quick Reference
 
 | Standard | Purpose | When to Use |
@@ -157,11 +211,11 @@ contract MyToken is ERC20, ERC20Permit {
 | EIP-7702 | Smart EOAs | Batching, sponsorship from EOA |
 | ERC-2612 | Permit | Gasless approvals |
 
----
-
 ## Pitfalls
 
 1. **Decimals vary.** USDC = 6, APTM = 18, WBTC = 8. Always call `.decimals()`.
 2. **Not all tokens return bool.** Use SafeERC20 (`safeTransfer`, `safeApprove`) for all token interactions.
 3. **Infinite approvals are dangerous.** Approve exact amounts or 3-5x, never `type(uint256).max`.
 4. **WAPTM ≠ APTM.** APTM is the native currency. WAPTM is an ERC-20 wrapper. They're different for DeFi interactions.
+
+**Post-2026-05-30 update**: This file now includes EIP-2981 (mandatory for NFT marketplaces), full secure extensions for ERC-721/1155, upgradable token bases, and the official contract layout standard used across the entire pack. Cross-reference security/SKILL.md for the matching upgradable + industry patterns and enforcement checklist.
