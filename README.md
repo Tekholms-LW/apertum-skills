@@ -190,10 +190,6 @@ apertum-skills/
 
 ---
 
-## Inspired By
-
-This project is inspired by [ethskills.com](https://ethskills.com) by Austin Griffith — the knowledge pack model for AI agents building on Ethereum.
-
 ## License
 
 MIT
