@@ -8,20 +8,23 @@ A collection of SKILL.md files that give AI coding agents (Claude, Hermes, Codex
 
 ## Quick Start
 
-Point your agent to the master skill:
+Point your agent to the master skill (default branch is **master**):
 
 ```
-https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/SKILL.md
 ```
 
 Or fetch individual skills:
 
 ```
-https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/getting-started/SKILL.md
-https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/addresses/SKILL.md
-https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/ship/SKILL.md
-https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/security/SKILL.md
-https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/standards/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/getting-started/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/addresses/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/ship/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/throughput/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/write-pipeline/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/optimize/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/ops/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/security/SKILL.md
 ```
 
 ---
@@ -33,7 +36,8 @@ https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/standards/SKIL
 | Chain ID      | 2786 |
 | Type          | Avalanche L1 (Subnet) |
 | Native Token  | APTM (18 decimals) |
-| Block Time    | ~2.8s |
+| Block Time    | ~2s-class (calibrated 2026-07-22: ~2.0–2.4s; older docs said ~2.8s) |
+| Block gas limit | 12,000,000 (tip sample 2026-07-22) |
 | Gas           | ~34 gwei (< $0.01/tx) |
 | RPC           | `https://rpc.apertum.io/ext/bc/YDJ1r9RMkewATmA7B35q1bdV18aywzmdiXwd9zGBq3uQjsCnn/rpc` (full URL verified 2026-05-30) |
 | Explorer      | `https://explorer.apertum.io/` |
@@ -84,6 +88,12 @@ Major improvements were added to bring the pack up to current smart contract sec
 - **[why-apertum](why-apertum/SKILL.md)** — Value proposition, specs, comparisons
 - **[ship](ship/SKILL.md)** — End-to-end dApp build guide
 
+### Throughput & Ops (from Developer Playbook, 2026-07)
+- **[throughput](throughput/SKILL.md)** — Calibrated performance: ~2s blocks, 12M gas, baselines & ceilings
+- **[write-pipeline](write-pipeline/SKILL.md)** — Nonce lanes, pre-sign + raw send, batch ABI, multi-writer
+- **[optimize](optimize/SKILL.md)** — Brownfield ladder, KPIs, product patterns, fast-L1 contract design
+- **[ops](ops/SKILL.md)** — RPC hardening, canaries, security-at-throughput, anti-patterns, checklists
+
 ### Reference
 - **[addresses](addresses/SKILL.md)** — Verified contract addresses (DEX, Bridge, wrapped tokens, oracles)
 - **[building-blocks](building-blocks/SKILL.md)** — DEX, DeFi legos, swap contracts
@@ -127,7 +137,7 @@ When an AI agent is asked to build on Apertum:
 
 ```
 Before writing Solidity, deploying contracts, or building a dApp 
-frontend on Apertum, read https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/main/SKILL.md 
+frontend on Apertum, read https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/SKILL.md 
 and follow it.
 ```
 
@@ -164,6 +174,10 @@ apertum-skills/
 ├── getting-started/
 ├── why-apertum/
 ├── ship/
+├── throughput/            # Playbook: measured performance & ceilings
+├── write-pipeline/        # Playbook: high-throughput writes
+├── optimize/              # Playbook: brownfield ladder & product patterns
+├── ops/                   # Playbook: RPC, canaries, anti-patterns
 ├── addresses/             # Public: DEX, Bridge, tokens, oracles
 ├── building-blocks/
 ├── gas/

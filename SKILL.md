@@ -19,7 +19,8 @@ You are building on Apertum — an Avalanche L1 (Subnet) with Chain ID 2786. Thi
 | **Type** | Avalanche L1 (Subnet) |
 | **Native Token** | APTM (18 decimals) |
 | **Consensus** | Proof of Stake with Gossip Protocol |
-| **Block Time** | ~2.8 seconds |
+| **Block Time** | ~2s-class (calibrated 2026-07-22: ~2.0–2.4s; older docs said ~2.8s) |
+| **Block gas limit** | 12,000,000 (tip sample 2026-07-22) |
 | **Gas** | ~34 gwei (< $0.01 per tx) |
 | **RPC** | `https://rpc.apertum.io/ext/bc/YDJ1r9RMkewATmA7B35q1bdV18aywzmdiXwd9zGBq3uQjsCnn/rpc` |
 | **Block Explorer** | `https://explorer.apertum.io/` |
@@ -53,6 +54,18 @@ End-to-end guide from idea to deployed dApp on Apertum. Routes you through all o
 
 ### [Gas & Costs](gas/SKILL.md)
 Current Apertum gas prices, transaction costs, and real economics. Gas is ~34 gwei, transactions cost under $0.01. What every operation actually costs.
+
+### [Throughput & Performance](throughput/SKILL.md)
+Calibrated chain performance (2026-07-22): ~2s blocks, 12M gas limit, measured baselines vs theoretical ceilings. Use when sizing TPS or deciding if slowness is client vs L1.
+
+### [Write Pipeline](write-pipeline/SKILL.md)
+High-throughput writes: nonce lanes, pre-sign + sendRaw, batch ABI, multi-writer packing. For agents, keepers, indexers, and backend firehoses.
+
+### [Optimize (Brownfield)](optimize/SKILL.md)
+Optimization ladder L0–L8, KPIs, "is it the chain?" decision tree, product-type patterns (marketplace / agents / DeFi / indexers), contract design for a fast L1.
+
+### [Ops Hardening](ops/SKILL.md)
+RPC writer hardening, observability/canaries, security-at-throughput, anti-patterns, and deploy/feature checklists.
 
 ### [Contract Addresses](addresses/SKILL.md)
 Verified contract addresses for every deployed protocol on Apertum. DEX, tokens, bridge contracts, infrastructure. Never hallucinate an address — check here first.
@@ -171,4 +184,4 @@ forge create --rpc-url https://rpc.apertum.io/ext/bc/YDJ1r9RMkewATmA7B35q1bdV18a
 - **Never hallucinate a contract address.** Wrong addresses = lost funds.
 - **Apertum is EVM-compatible.** If it works on Ethereum, it probably works on Apertum — just update the chain config.
 - **Gas is ~34 gwei.** Not "10-30 gwei" like Ethereum. Not sub-gwei like post-Fusaka mainnet. Check live on the explorer.
-- **Block time is ~2.8s.** Faster than Ethereum (12s), typical for Avalanche L1s.
+- **Block time is ~2s-class** (measured ~2.0–2.4s as of 2026-07-22; older pack text said ~2.8s). Faster than Ethereum (12s). For capacity math and ceilings, fetch `throughput/SKILL.md`.
