@@ -24,6 +24,7 @@ https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/throughput/S
 https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/write-pipeline/SKILL.md
 https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/optimize/SKILL.md
 https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/ops/SKILL.md
+https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/upgrades/SKILL.md
 https://raw.githubusercontent.com/Tekholms-LW/apertum-skills/master/security/SKILL.md
 ```
 
@@ -102,6 +103,7 @@ Major improvements were added to bring the pack up to current smart contract sec
 
 ### Smart Contracts & Security (2026 Enhanced)
 - **[security](security/SKILL.md)** — Reentrancy, decimals, SafeERC20, access control, **UUPS upgradability**, industry patterns
+- **[upgrades](upgrades/SKILL.md)** — OZ integration: proxies, ERC-7201, Hardhat/Foundry upgrades plugins, remappings, v4↛v5
 - **[standards](standards/SKILL.md)** — ERC-20/721/1155, EIP-2981 royalties, **consistent layout & ordering**, upgradable bases
 - **[audit](audit/SKILL.md)** — Systematic audit methodology + **automated tooling (Slither, Foundry)**
 - **[testing](testing/SKILL.md)** — Foundry tests, fuzz, fork Apertum
@@ -182,6 +184,7 @@ apertum-skills/
 ├── building-blocks/
 ├── gas/
 ├── security/              # Enhanced 2026 (UUPS, patterns)
+├── upgrades/              # OZ plugins, ERC-7201, proxy patterns
 ├── standards/             # Enhanced 2026 (EIP-2981, layout)
 ├── audit/                 # Enhanced 2026 (tooling)
 ├── testing/

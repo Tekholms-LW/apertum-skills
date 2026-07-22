@@ -115,6 +115,31 @@ def main() -> int:
             # allow calibrated language
             if "2s-class" not in cat:
                 errors.append(f"{catalog_name}: expected block-time calibration note (~2s-class)")
+        if "upgrades" not in cat:
+            errors.append(f"{catalog_name}: does not list skill upgrades")
+
+    # OZ-derived upgrades skill (Solidity-only helpful subset)
+    up_path = ROOT / "upgrades" / "SKILL.md"
+    if not up_path.is_file() or up_path.stat().st_size == 0:
+        errors.append("missing or empty skill: upgrades/SKILL.md")
+    else:
+        up = read(up_path)
+        ok, msg = frontmatter_ok(up)
+        if not ok:
+            errors.append(f"upgrades: frontmatter {msg}")
+        if re.search(r"/home/sky_ai/", up):
+            errors.append("upgrades: leaked /home/sky_ai/ path")
+        for key, pat in {
+            "uups": re.compile(r"\bUUPS\b"),
+            "erc7201": re.compile(r"ERC-7201|namespaced storage", re.I),
+            "hardhat_plugin": re.compile(r"hardhat-upgrades", re.I),
+            "foundry_plugin": re.compile(r"foundry-upgrades|openzeppelin-foundry-upgrades", re.I),
+            "v4_v5": re.compile(r"v4.*v5|v4→v5|v4↛v5", re.I),
+            "remappings": re.compile(r"remappings", re.I),
+            "chain_2786": re.compile(r"\b2786\b"),
+        }.items():
+            if not pat.search(up):
+                errors.append(f"upgrades missing marker: {key}")
 
     if errors:
         print("FAIL")

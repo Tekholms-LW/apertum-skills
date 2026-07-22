@@ -76,6 +76,9 @@ EOAs, multisig (Safe), and account abstraction on Apertum. EIP-7702 is live. How
 ### [Smart Contract Security](security/SKILL.md)
 Solidity security patterns, common vulnerabilities, and pre-deploy audit checklist. Reentrancy, decimal mishandling, SafeERC20, access control. Same patterns as any EVM chain — but the stakes are the same.
 
+### [Upgrades & OpenZeppelin](upgrades/SKILL.md)
+Solidity-only: UUPS / Transparent / Beacon, ERC-7201 namespaced storage, Hardhat & Foundry upgrades plugins, OZ remappings, contracts-cli pattern discovery, v4→v5 proxy restrictions. Use when deploying or upgrading OZ-based contracts on Apertum.
+
 ### [Testing](testing/SKILL.md)
 Smart contract testing with Foundry on Apertum. Unit tests, fuzz testing, fork testing against Apertum mainnet state.
 

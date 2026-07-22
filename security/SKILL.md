@@ -251,6 +251,8 @@ forge create --rpc-url $APERTUM_RPC src/MyUpgradable.sol:MyUpgradable --private-
 
 See references/secure-upgradable-template.md for full UUPS ERC721 + royalties + marketplace example.
 
+**For production upgrades tooling** (ERC-7201 namespaced storage, Hardhat/Foundry upgrades plugins, Transparent/Beacon, OZ v4→v5 ban, remappings): fetch `upgrades/SKILL.md`.
+
 ## Industry-Specific Security Patterns
 
 ### NFT Marketplace (Core Use Case)
